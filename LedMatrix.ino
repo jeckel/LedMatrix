@@ -4,14 +4,12 @@ int addrY1 = 3;
 int addrY2 = 4;
 int addrY3 = 5;
 
-int addrX1 = 6;
-int addrX2 = 7;
-int addrX3 = 8;
-int addrX4 = 9;
-int addrX5 = 10;
-int addrX6 = 11;
-int addrX7 = 12;
-int addrX8 = 13;
+//Pin connected to ST_CP of 74HC595
+int latchPin = 8;
+//Pin connected to SH_CP of 74HC595
+int clockPin = 12;
+////Pin connected to DS of 74HC595
+int dataPin = 11;
 
 #define addrXPin 6
 
@@ -41,15 +39,12 @@ void setup()
     pinMode(addrY1, OUTPUT);
     pinMode(addrY2, OUTPUT);
     pinMode(addrY3, OUTPUT);
-    pinMode(addrX1, OUTPUT);
-    pinMode(addrX2, OUTPUT);
-    pinMode(addrX3, OUTPUT);
-    pinMode(addrX4, OUTPUT);
-    pinMode(addrX5, OUTPUT);
-    pinMode(addrX6, OUTPUT);
-    pinMode(addrX7, OUTPUT);
-    pinMode(addrX8, OUTPUT);
 
+    pinMode(latchPin, OUTPUT);
+    pinMode(clockPin, OUTPUT);
+    pinMode(dataPin, OUTPUT);
+    
+    pinMode(13, OUTPUT);  
     randomSeed(analogRead(0));
     for(int i = 0; i <= 7; i++) {
         matrix[i] = random(0, 256);
@@ -86,12 +81,10 @@ int getNewInterval()
  */
 void timeredDisplay()
 {
-    // For each row
-    //  for(int y = 0; y <= 7; y++) {
     // First, set all pins off to avoid unwanted persistance
-    for(int x = 0; x <= 7; x++) {
-        digitalWrite(addrXPin + x, LOW);
-    }
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, 0);  
+    digitalWrite(latchPin, HIGH);
 
     // Update address of next row on Demux
     digitalWrite(addrY1, (row & 1) ? HIGH : LOW);
@@ -99,13 +92,14 @@ void timeredDisplay()
     digitalWrite(addrY3, (row & 4) ? HIGH : LOW);
 
     // Set all pin to the wanted value
-    for(int x = 0; x <= 7; x++) {
-        digitalWrite(addrXPin + x, ((matrix[row] >> x) % 2) ? HIGH : LOW);
-    }
-
-    // Small delay for persistance
-    //    delay(1);
-    //  }
+    // take the latchPin low so 
+    // the LEDs don't change while you're sending in bits:
+    digitalWrite(latchPin, LOW);
+    // shift out the bits:
+    shiftOut(dataPin, clockPin, MSBFIRST, matrix[row]);  
+    //take the latch pin high so the LEDs will light up:
+    digitalWrite(latchPin, HIGH);
+    
     row = (row + 1) % 8;
 }
 
