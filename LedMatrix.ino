@@ -1,22 +1,22 @@
 #include <TimerOne.h>
 
-int addrY1 = 3;
-int addrY2 = 4;
-int addrY3 = 5;
+byte addrY1 = 3;
+byte addrY2 = 4;
+byte addrY3 = 5;
 
 //Pin connected to ST_CP of 74HC595
-int latchPin = 8;
+byte latchPin = 8;
 //Pin connected to SH_CP of 74HC595
-int clockPin = 12;
+byte clockPin = 12;
 ////Pin connected to DS of 74HC595
-int dataPin = 11;
+byte dataPin = 11;
 
 #define addrXPin 6
 
-int matrix[] = {
+byte matrix[] = {
     0, 0, 0, 0, 0, 0, 0, 0};
 
-int row = 0;
+byte row = 0;
 
 long previousMillis = 0;
 long interval = 30; 
@@ -25,10 +25,6 @@ long interval = 30;
 
 void setup() 
 {
-    // Initialize the digital pin as an output.
-    // Pin 13 has an LED connected on most Arduino boards
-    //  pinMode(13, OUTPUT);    
-
     //  Timer1.initialize(100000); // set a timer of length 100000 microseconds (or 0.1 sec - or 10Hz => the led will blink 5 times, 5 cycles of on-and-off, per second)
     //  Timer1.attachInterrupt( timerIsr ); // attach the service routine here
 
