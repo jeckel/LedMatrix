@@ -29,10 +29,11 @@ byte row = 0;
 long previousMillis = 0;
 long interval = 30; 
 
-#define RANDOM_EFFECT 0
-#define GO_UP_EFFECT  1
+#define RANDOM_EFFECT  0
+#define GO_UP_EFFECT   1
+#define ROTATOR_EFFECT 2
 
-#define NB_EFFECTS    2
+#define NB_EFFECTS     3
 
 byte current_effect = RANDOM_EFFECT;
 
@@ -65,8 +66,9 @@ void loop()
 {
     switch(current_effect)
     {
-        case RANDOM_EFFECT : randomEffect(); break;
-        case GO_UP_EFFECT  : goUpEffect();   break;
+        case RANDOM_EFFECT  : randomEffect();  break;
+        case GO_UP_EFFECT   : goUpEffect();    break;
+        case ROTATOR_EFFECT : rotatorEffect(); break;
     }
 }
 
@@ -128,6 +130,9 @@ void randomEffect()
     delay(getNewInterval());
 }
 
+/**
+ * Make a line that go from bottom to up
+ */
 void goUpEffect()
 {
     for(int i = 0; i < 4; i++)
@@ -137,5 +142,20 @@ void goUpEffect()
         matrix[3 - (i + 3) % 4] = 0;
         matrix[((i + 3) % 4) + 4] = 0;
         delay(getNewInterval() * 4);
+    }
+}
+
+/**
+ * Two small lines rotating around the head
+ */
+void rotatorEffect()
+{
+    for(int i = 0; i < 8; i++)
+    {
+        for(byte x = 0; x < 8; x++)
+        {
+            matrix[x] = (x < 4) ? 1 << i : 1 << 8-i;
+        }
+        delay(getNewInterval() * 2);
     }
 }
