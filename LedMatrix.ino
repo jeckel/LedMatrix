@@ -1,5 +1,13 @@
 #include <TimerOne.h>
 
+/**
+ * Using ShiftOut IC :
+ * http://arduino.cc/en/Tutorial/ShiftOut
+ *
+ * And Demultiplexer : SN74S138N
+ * http://pdf1.alldatasheet.com/datasheet-pdf/view/27992/TI/SN74S138N.html
+ */
+
 byte addrY1 = 3;
 byte addrY2 = 4;
 byte addrY3 = 5;
@@ -21,7 +29,12 @@ byte row = 0;
 long previousMillis = 0;
 long interval = 30; 
 
+#define RANDOM_EFFECT 0
+#define GO_UP_EFFECT  1
 
+#define NB_EFFECTS    2
+
+byte current_effect = RANDOM_EFFECT;
 
 void setup() 
 {
@@ -50,13 +63,10 @@ void setup()
 
 void loop()
 {
-    unsigned long currentMillis = millis();
-
-    if(currentMillis - previousMillis > interval) {
-        // save the last time you blinked the LED 
-        previousMillis = currentMillis;
-        matrix[random(0, 8)] = random(0, 256);
-        interval = getNewInterval();
+    switch(current_effect)
+    {
+        case RANDOM_EFFECT : randomEffect(); break;
+        case GO_UP_EFFECT  : goUpEffect();   break;
     }
 }
 
@@ -69,7 +79,7 @@ int getNewInterval()
      float voltage = sensorValue * (5.0 / 1023.0);
      */
 //    return (1023 - analogRead(A0)) / 4;
-    return 10;
+    return 20;
 }
 
 /**
@@ -77,6 +87,9 @@ int getNewInterval()
  */
 void timeredDisplay()
 {
+    unsigned long currentMillis = millis();
+    int interval_between_effects = 5 * 1000;         // 5 seconds
+    
     // First, set all pins off to avoid unwanted persistance
     digitalWrite(latchPin, LOW);
     shiftOut(dataPin, clockPin, MSBFIRST, 0);  
@@ -97,5 +110,32 @@ void timeredDisplay()
     digitalWrite(latchPin, HIGH);
     
     row = (row + 1) % 8;
+
+    // Change effect
+    if(currentMillis - previousMillis > interval_between_effects) {
+        // save the last time you blinked the LED 
+        previousMillis = currentMillis;
+        current_effect = random(0, NB_EFFECTS);
+    }
 }
 
+/**
+ * Randomly turn on and off leds
+ */
+void randomEffect()
+{
+    matrix[random(0, 8)] = random(0, 256);
+    delay(getNewInterval());
+}
+
+void goUpEffect()
+{
+    for(int i = 0; i < 4; i++)
+    {
+        matrix[3 - i] = 255;
+        matrix[i + 4] = 255;
+        matrix[3 - (i + 3) % 4] = 0;
+        matrix[((i + 3) % 4) + 4] = 0;
+        delay(getNewInterval() * 4);
+    }
+}
